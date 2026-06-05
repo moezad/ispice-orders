@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>iSpice | Rep Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --green:#78bd2a;--green2:#4f8619;--dark:#152012;--muted:#65715f;
+  --line:#dae7d4;--soft:#f5fbef;--cream:#fffdf7;--red:#d73226;
+  --shadow:0 22px 60px rgba(19,35,12,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:var(--dark);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(circle at 0% 0%,rgba(120,189,42,.14),transparent 28rem),radial-gradient(circle at 100% 5%,rgba(255,200,87,.14),transparent 24rem),linear-gradient(180deg,#fff,var(--cream) 30%,#fff);min-height:100%}
+.app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* SETUP PANEL */
+.setup-panel{
+  background:#fff8e0;border-bottom:1px solid #f5e0a8;
+  padding:14px 20px;font-size:13px;color:#78350f;
+}
+.setup-panel summary{
+  font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;list-style:none;
+}
+.setup-panel summary::before{content:'⚙️ '}
+.setup-panel summary::-webkit-details-marker{display:none}
+.setup-panel[open] summary{margin-bottom:14px}
+.setup-steps{display:grid;gap:10px}
+.setup-step{
+  display:flex;gap:12px;align-items:flex-start;
+  background:rgba(255,255,255,.7);border:1px solid #f0dfa0;border-radius:14px;padding:12px 14px;
+}
+.setup-step .num{
+  width:26px;height:26px;border-radius:50%;flex-shrink:0;
+  background:#d97706;color:#fff;font-weight:900;font-size:12px;
+  display:flex;align-items:center;justify-content:center;margin-top:1px;
+}
+.setup-step p{font-size:13px;line-height:1.55;color:#78350f}
+.setup-step strong{color:#451a03}
+.setup-step code{background:#fff;border:1px solid #f0dfa0;border-radius:6px;padding:2px 6px;font-family:monospace;font-size:12px;word-break:break-all}
+.setup-done-btn{margin-top:12px;padding:10px 20px;background:linear-gradient(180deg,#8aca3e,#63a61d);color:#fff;border:none;border-radius:12px;font-family:Inter,sans-serif;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(120,189,42,.3)}
+
+/* TOPBAR */
+.topbar{flex-shrink:0;height:70px;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(218,231,212,.95);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:60}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{width:40px;height:40px;border-radius:13px;background:linear-gradient(180deg,#8aca3e,#63a61d);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 14px rgba(120,189,42,.35)}
+.brand h1{font-family:Sora,sans-serif;font-size:19px;font-weight:800;letter-spacing:-.5px}
+.brand h1 em{font-style:normal;color:var(--green2)}
+.brand p{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-top:1px}
+.top-right{display:flex;align-items:center;gap:8px}
+.rep-badge{background:linear-gradient(180deg,var(--soft),#edf7d6);border:1px solid var(--line);padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;color:var(--green2)}
+.back-link{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;transition:all .15s}
+.back-link:hover{border-color:var(--green);color:var(--dark);background:var(--soft)}
+
+/* TABS */
+.tab-bar{flex-shrink:0;display:flex;background:rgba(255,255,255,.9);border-bottom:1px solid var(--line);padding:0 16px;overflow-x:auto}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:14px 18px;border:none;background:transparent;font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;position:relative;transition:color .18s;white-space:nowrap}
+.tab-btn::after{content:'';position:absolute;bottom:-1px;left:16px;right:16px;height:2.5px;border-radius:2px;background:var(--green);transform:scaleX(0);transition:transform .2s}
+.tab-btn.active{color:var(--green2)}.tab-btn.active::after{transform:scaleX(1)}
+
+/* SCROLL */
+.scroll{flex:1;overflow-y:auto;padding:22px 20px 100px;max-width:860px;margin:0 auto;width:100%}
+.scroll::-webkit-scrollbar{width:4px}
+.scroll::-webkit-scrollbar-thumb{background:rgba(120,189,42,.25);border-radius:4px}
+
+/* VIEWS */
+.tab-view{display:none}.tab-view.active{display:block}
+.sec-title{font-family:Sora,sans-serif;font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:4px}
+.sec-sub{font-size:13px;color:var(--muted);margin-bottom:20px;font-weight:500}
+
+/* LOADING */
+.loading-row{display:flex;align-items:center;gap:10px;padding:16px;color:var(--muted);font-size:14px;font-weight:600}
+.spin{width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* LIVE BAR */
+.live-bar{display:none;align-items:center;gap:8px;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--green2);animation:slideDown .3s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ORDERS META */
+.orders-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap}
+.count-pill{display:inline-flex;align-items:center;gap:7px;background:var(--soft);border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-size:13px;font-weight:800;color:var(--green2)}
+.meta-right{display:flex;align-items:center;gap:8px}
+.btn-refresh{width:36px;height:36px;border:1.5px solid var(--line);background:#fff;border-radius:12px;cursor:pointer;font-size:18px;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.btn-refresh:hover{border-color:var(--green);color:var(--green2);background:var(--soft);transform:rotate(180deg)}
+
+/* ORDER CARDS */
+.order-card{background:rgba(255,255,255,.95);border:1px solid rgba(218,231,212,.95);border-radius:22px;padding:18px;margin-bottom:10px;box-shadow:0 4px 16px rgba(19,35,12,.06);transition:box-shadow .18s}
+.order-card:hover{box-shadow:0 8px 28px rgba(19,35,12,.1)}
+.order-top{display:flex;align-items:center;gap:14px}
+.order-av{width:44px;height:44px;flex-shrink:0;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#fff}
+.av-breakfast{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.av-salad{background:linear-gradient(135deg,#78bd2a,#4f8619)}
+.av-saladlunch{background:linear-gradient(135deg,#0ea5e9,#0369a1)}
+.av-lunch{background:linear-gradient(135deg,#f97316,#c2410c)}
+.av-extras{background:linear-gradient(135deg,#9333ea,#7e22ce)}
+.order-body{flex:1;min-width:0}
+.order-name{font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.order-detail{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.order-right{flex-shrink:0;text-align:right}
+.order-qty{display:inline-block;background:var(--soft);border:1px solid var(--line);color:var(--green2);padding:4px 12px;border-radius:999px;font-size:13px;font-weight:800;margin-bottom:4px}
+.order-time{font-size:11px;color:#b0bca8;display:block}
+.cat-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:800}
+.chip-breakfast{background:#fff8e0;color:#a16207;border:1px solid #f5e0a8}
+.chip-salad{background:var(--soft);color:var(--green2);border:1px solid var(--line)}
+.chip-saladlunch{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
+.chip-lunch{background:#fff7ed;color:#c2410c;border:1px solid #fed7a0}
+.chip-extras{background:#faf5ff;color:#7e22ce;border:1px solid #e9d5ff}
+.order-comment{margin-top:12px;background:#f8fbf4;border-left:4px solid var(--green);border-radius:0 14px 14px 0;padding:11px 14px;font-size:13px;color:#33402e;line-height:1.55}
+.order-comment strong{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:5px}
+.empty{text-align:center;padding:52px 20px;color:var(--muted)}
+.empty .big{font-size:52px;margin-bottom:14px}
+.empty p{font-size:15px;line-height:1.65;font-weight:500}
+
+/* SUMMARY */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.sum-card{background:rgba(255,255,255,.95);border:1px solid rgba(218,231,212,.95);border-radius:22px;padding:18px;box-shadow:0 4px 14px rgba(19,35,12,.06)}
+.sum-cat-label{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.sum-total{font-size:28px;font-weight:900;line-height:1;margin-left:auto}
+.sum-total span{font-size:13px;font-weight:600;color:var(--muted);margin-left:4px}
+.sum-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:10px;background:var(--soft);border:1px solid var(--line);margin-bottom:6px;font-size:13px}
+.sum-item:last-child{margin-bottom:0}.sum-item span:last-child{font-weight:800}
+
+/* MENU EDITOR */
+.editor-notice{display:flex;gap:12px;align-items:flex-start;background:#fffbef;border:1px solid #f5e0a8;border-radius:18px;padding:14px 16px;margin-bottom:18px;font-size:13px;color:#92400e;line-height:1.55;font-weight:500}
+.editor-notice .ico{font-size:20px;flex-shrink:0;margin-top:1px}
+.editor-cat-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.ecat-tab{padding:8px 15px;border-radius:999px;font-family:Inter,sans-serif;font-size:12px;font-weight:800;border:1.5px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;transition:all .18s;white-space:nowrap}
+.ecat-tab.active{background:linear-gradient(180deg,#8aca3e,#63a61d);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(120,189,42,.35)}
+.ecat-tab:hover:not(.active){border-color:var(--green);color:var(--dark)}
+.add-row{display:flex;gap:10px;margin-bottom:16px}
+.add-input{flex:1;padding:13px 15px;background:#fff;border:1.5px solid var(--line);border-radius:14px;font-family:Inter,sans-serif;font-size:14px;font-weight:600;color:var(--dark);outline:none;transition:all .2s}
+.add-input::placeholder{color:#b8c8b4}
+.add-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(120,189,42,.14)}
+.add-btn{flex-shrink:0;padding:13px 20px;border:none;border-radius:14px;background:linear-gradient(180deg,#8aca3e,#63a61d);color:#fff;font-family:Inter,sans-serif;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(120,189,42,.35);transition:all .18s}
+.add-btn:hover{transform:scale(1.05)}
+.item-list{display:flex;flex-direction:column;gap:7px}
+.item-row{display:flex;align-items:center;gap:12px;padding:13px 16px;background:rgba(255,255,255,.95);border:1px solid rgba(218,231,212,.9);border-radius:16px;transition:all .18s}
+.item-row:hover{background:#fff}
+.item-name{flex:1;font-size:14px;font-weight:600;color:var(--dark)}
+.del-btn{width:32px;height:32px;flex-shrink:0;border-radius:10px;border:1px solid #fecaca;background:#fff5f5;color:#dc2626;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .18s}
+.del-btn:hover{background:#fca5a5;border-color:#ef4444;color:#7f1d1d}
+.no-items{text-align:center;padding:28px;color:var(--muted);font-size:14px;font-weight:500}
+
+/* BOTTOM NAV */
+.page-nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:14px;min-height:80px;padding:14px 20px;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);z-index:50}
+.nav-center{font-size:13px;color:var(--muted);font-weight:700;text-align:center}
+.nav-center strong{color:var(--dark)}
+.btn-nav{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:11px 16px;font-family:Inter,sans-serif;font-size:13px;font-weight:800;color:var(--dark);cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-nav:hover{border-color:var(--green);background:var(--soft)}
+.btn-nav.green{background:linear-gradient(180deg,#8aca3e,#63a61d);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(120,189,42,.35)}
+.btn-nav.green:hover{box-shadow:0 6px 20px rgba(120,189,42,.45);transform:translateY(-1px)}
+.btn-nav.danger{color:var(--red);border-color:#fecaca}.btn-nav.danger:hover{background:#fff5f5;border-color:var(--red)}
+
+/* TOAST */
+#toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--dark);color:#fff;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:700;box-shadow:var(--shadow);opacity:0;transition:all .32s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:560px){.summary-grid{grid-template-columns:1fr}.rep-badge{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══ SETUP GUIDE — expands with instructions ══ -->
+<details class="setup-panel" id="setupPanel">
+  <summary>Setup Required — tap to see how to connect orders across devices (one-time, 5 min)</summary>
+  <div class="setup-steps">
+
+    <div class="setup-step">
+      <div class="num">1</div>
+      <p>
+        Open <a href="https://sheets.google.com" target="_blank" style="color:var(--green2);font-weight:800">sheets.google.com</a> and create a new spreadsheet.
+        Name it <strong>iSpice Orders</strong>. Then go to <strong>Extensions → Apps Script</strong>.
+      </p>
+    </div>
+
+    <div class="setup-step">
+      <div class="num">2</div>
+      <p>
+        Delete all existing code in Apps Script. Then open the file <strong>apps-script.gs</strong> that came with this package,
+        copy all of it, and paste it into Apps Script. Click <strong>Save</strong> (💾).
+      </p>
+    </div>
+
+    <div class="setup-step">
+      <div class="num">3</div>
+      <p>
+        Click <strong>Deploy → New deployment</strong>. Set type to <strong>Web app</strong>.
+        Set <em>"Execute as"</em> to <strong>Me</strong> and <em>"Who has access"</em> to <strong>Anyone</strong>.
+        Click <strong>Deploy</strong> and copy the URL it gives you.
+      </p>
+    </div>
+
+    <div class="setup-step">
+      <div class="num">4</div>
+      <p>
+        Open both <strong>index.html</strong> and <strong>dashboard.html</strong> in a text editor.
+        Find the line <code>const SCRIPT_URL = '';</code> near the top of each file,
+        and paste your URL between the quotes. Save both files and re-upload to GitHub.
+      </p>
+    </div>
+
+    <div class="setup-step">
+      <div class="num">5</div>
+      <p>
+        Done! Orders from any device will now appear here instantly.
+        Your Google Sheet also acts as a live record — the rep can open it directly anytime.
+      </p>
+    </div>
+
+  </div>
+  <button class="setup-done-btn" onclick="dismissSetup()">✓ I've set it up — hide this</button>
+</details>
+
+<!-- ══ TOPBAR ══ -->
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-icon">🌶️</div>
+    <div><h1>i<em>Spice</em></h1><p>Rep Dashboard</p></div>
+  </div>
+  <div class="top-right">
+    <span class="rep-badge">📋 Rep View</span>
+    <a href="index.html" class="back-link">← Order Page</a>
+  </div>
+</header>
+
+<!-- ══ TABS ══ -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('orders',this)">📋 Orders</button>
+  <button class="tab-btn" onclick="switchTab('summary',this)">📊 Summary</button>
+  <button class="tab-btn" onclick="switchTab('menu',this)">✏️ Edit Menu</button>
+</div>
+
+<!-- ══ SCROLL ══ -->
+<div class="scroll">
+
+  <!-- Orders -->
+  <div id="tab-orders" class="tab-view active">
+    <div class="orders-meta">
+      <div>
+        <h2 class="sec-title">All Orders</h2>
+        <p class="sec-sub" id="syncStatus">Loading…</p>
+      </div>
+      <div class="meta-right">
+        <span class="count-pill" id="orderCount">—</span>
+        <button class="btn-refresh" onclick="refresh()" title="Refresh now">↻</button>
+      </div>
+    </div>
+    <div id="liveBar" class="live-bar"></div>
+    <div id="orderList"><div class="loading-row"><div class="spin"></div> Fetching orders…</div></div>
+  </div>
+
+  <!-- Summary -->
+  <div id="tab-summary" class="tab-view">
+    <h2 class="sec-title">Order Summary</h2>
+    <p class="sec-sub">Totals by category and dish</p>
+    <div class="summary-grid" id="summaryGrid"></div>
+  </div>
+
+  <!-- Menu Editor -->
+  <div id="tab-menu" class="tab-view">
+    <h2 class="sec-title">Edit Weekly Menu</h2>
+    <p class="sec-sub">Add or remove dishes — no coding needed</p>
+    <div class="editor-notice">
+      <span class="ico">💡</span>
+      <span>Changes save instantly. Type a dish name and press <strong>+</strong> (or Enter). Click ✕ to remove.</span>
+    </div>
+    <div class="editor-cat-tabs" id="editorCatTabs"></div>
+    <div class="add-row">
+      <input class="add-input" type="text" id="newItem" placeholder="Type a new dish name…" maxlength="60"/>
+      <button class="add-btn" onclick="addMenuItem()">+</button>
+    </div>
+    <div class="item-list" id="itemList"></div>
+  </div>
+
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="page-nav">
+  <button class="btn-nav green" onclick="emailOrders()">📧 Email Orders</button>
+  <span class="nav-center"><strong id="totalCount">0</strong> orders today</span>
+  <button class="btn-nav danger" onclick="clearOrders()">🗑 Clear All</button>
+</nav>
+
+</div>
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   ⚙️  CONFIGURATION — paste your Apps Script URL here
+   (same URL as in index.html)
+══════════════════════════════════════════════════════ */
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCt24DVokBCGA_ZdZNcmPMm5SlX7OAmi0cKqB4MasnzD2ZbfPuJEwG79cw02tNADBu/exec';
+
+/* ══════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════ */
+const CATS=[
+  {key:'breakfast', label:'Breakfast',    emoji:'🌅',cls:'breakfast' },
+  {key:'salad',     label:'Salad',         emoji:'🥗',cls:'salad'     },
+  {key:'saladlunch',label:'Salad & Lunch', emoji:'🍱',cls:'saladlunch'},
+  {key:'lunch',     label:'Lunch',         emoji:'🍛',cls:'lunch'     },
+  {key:'extras',    label:'Extras',        emoji:'✨',cls:'extras'    },
+];
+
+const DEFAULT_MENU={
+  breakfast:  ['Egg & Cheese Wrap 🥚','Avocado Toast 🥑','Oatmeal Berry Bowl 🫐','Pancake Stack 🥞','Fruit Parfait 🍓','Breakfast Burrito 🌯'],
+  salad:      ['Caesar Salad 🥗','Greek Salad 🫒','Quinoa Power Bowl 🌾','Caprese Salad 🍅','Garden Salad 🥬','Asian Slaw 🥕'],
+  saladlunch: ['Grilled Chicken Salad 🍗','Salmon Caesar 🐟','Steak Salad Bowl 🥩','Falafel Bowl 🧆','Tuna Nicoise 🐠'],
+  lunch:      ['Chicken Biryani 🍗','Butter Chicken 🍛','Lamb Curry 🍖','Paneer Tikka Masala 🧀','Dal Makhani 🫘','Shrimp Coconut Curry 🦐','Vegetable Korma 🥦'],
+  extras:     ['Naan Bread 🫓','Basmati Rice 🍚','Mango Lassi 🥭','Sparkling Water 💧','Dessert of the Day 🍮'],
+};
+
+const REP_EMAIL = 'mozad@ispicefoods.com';
+
+let editorCat  = 'breakfast';
+let lastCount  = 0;
+let cachedOrders = [];
+let pollTimer  = null;
+
+const getMenu   = ()=> { const s=localStorage.getItem('ispice_menu_v3'); return s?JSON.parse(s):DEFAULT_MENU; };
+const saveMenu  = m => localStorage.setItem('ispice_menu_v3', JSON.stringify(m));
+const getLocal  = ()=> JSON.parse(localStorage.getItem('ispice_orders_v3')||'[]');
+const saveLocal = o => localStorage.setItem('ispice_orders_v3', JSON.stringify(o));
+
+/* ══════════════════════════════════════════════════════
+   SETUP
+══════════════════════════════════════════════════════ */
+function init() {
+  // Hide setup panel if SCRIPT_URL is configured, or if user dismissed it
+  const dismissed = localStorage.getItem('ispice_setup_dismissed');
+  if (SCRIPT_URL || dismissed) {
+    document.getElementById('setupPanel').style.display = 'none';
+  }
+
+  buildEditorTabs();
+  renderEditorItems();
+  loadOrders();
+
+  // Auto-refresh every 8 seconds
+  pollTimer = setInterval(()=>{ loadOrders(true); }, 8000);
+
+  // Also refresh when tab becomes visible
+  document.addEventListener('visibilitychange', ()=>{
+    if (!document.hidden) loadOrders(true);
+  });
+
+  // Listen for same-browser tab changes (fallback)
+  window.addEventListener('storage', e=>{
+    if (e.key === 'ispice_orders_v3') loadOrders(true);
+  });
+
+  // Enter key in menu editor
+  document.getElementById('newItem').addEventListener('keydown', e=>{
+    if (e.key==='Enter') addMenuItem();
+  });
+}
+
+function dismissSetup() {
+  localStorage.setItem('ispice_setup_dismissed', '1');
+  document.getElementById('setupPanel').style.display = 'none';
+}
+
+/* ══════════════════════════════════════════════════════
+   FETCH ORDERS
+══════════════════════════════════════════════════════ */
+async function loadOrders(silent=false) {
+  let orders;
+
+  if (SCRIPT_URL) {
+    // ── Fetch from Google Sheets ──────────────────────
+    try {
+      const r   = await fetch(SCRIPT_URL+'?action=list', {redirect:'follow', cache:'no-store'});
+      const raw = await r.json();
+      orders = Array.isArray(raw) ? raw : [];
+      saveLocal(orders);                       // cache locally
+      setSyncStatus('✓ Live — syncing across all devices');
+    } catch(e) {
+      orders = getLocal();                     // fallback to cache
+      setSyncStatus('⚠️ Could not reach server — showing last saved orders');
+    }
+  } else {
+    // ── Local-only fallback ───────────────────────────
+    orders = getLocal();
+    setSyncStatus('📱 Local only — set up Google Sheets for cross-device sync');
+  }
+
+  // Detect new orders
+  if (!silent && orders.length > lastCount) {
+    const diff = orders.length - lastCount;
+    showLiveBar('🔔 '+diff+' new order'+(diff>1?'s':'')+' received!');
+  }
+
+  lastCount    = orders.length;
+  cachedOrders = orders;
+  renderOrders(orders);
+  renderSummary(orders);
+  updateCount(orders.length);
+}
+
+function refresh() { loadOrders(); toast('✓ Refreshed'); }
+
+/* ══════════════════════════════════════════════════════
+   RENDER ORDERS
+══════════════════════════════════════════════════════ */
+function renderOrders(orders) {
+  const list  = document.getElementById('orderList');
+  document.getElementById('orderCount').textContent = orders.length + (orders.length===1?' order':' orders');
+
+  if (!orders.length) {
+    list.innerHTML=`<div class="empty"><div class="big">🍽️</div><p>No orders yet.<br/>Employees order from <a href="index.html" style="color:var(--green2);font-weight:700">the Order Page</a>.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = orders.map(o=>{
+    // Support both Google Sheets rows (lowercase keys) and localStorage objects
+    const name    = o.name    || '';
+    const item    = o.item    || '';
+    const qty     = o.qty     || 1;
+    const comment = o.comment || '';
+    const catCls  = o.catcls  || o.catCls  || 'lunch';
+    const catLabel= o.catlabel|| o.catLabel || '';
+    const catEmoji= o.catemoji|| o.catEmoji || '🍽️';
+    const time    = o.time    || '';
+
+    const commentHtml = comment
+      ? `<div class="order-comment"><strong>💬 Special Request</strong>${esc(comment)}</div>`
+      : '';
+
+    return `<div class="order-card">
+      <div class="order-top">
+        <div class="order-av av-${catCls}">${name.charAt(0).toUpperCase()}</div>
+        <div class="order-body">
+          <div class="order-name">${esc(name)}</div>
+          <div class="order-detail">
+            <span class="cat-chip chip-${catCls}">${catEmoji} ${esc(catLabel)}</span>
+            &nbsp; ${esc(item)}
+          </div>
+        </div>
+        <div class="order-right">
+          <span class="order-qty">×${qty}</span>
+          <span class="order-time">${time}</span>
+        </div>
+      </div>
+      ${commentHtml}
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER SUMMARY
+══════════════════════════════════════════════════════ */
+function renderSummary(orders) {
+  orders = orders || cachedOrders;
+  const grid = document.getElementById('summaryGrid');
+  if (!orders.length) {
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="big">📊</div><p>No orders yet.</p></div>';
+    return;
+  }
+  const byCat={};
+  CATS.forEach(c=>{byCat[c.key]={total:0,items:{}}});
+  orders.forEach(o=>{
+    const key = o.catkey || o.catKey || 'lunch';
+    if (!byCat[key]) return;
+    const q = Number(o.qty)||1;
+    byCat[key].total+=q;
+    const item = o.item||'';
+    byCat[key].items[item]=(byCat[key].items[item]||0)+q;
+  });
+  grid.innerHTML = CATS.map(cat=>{
+    const d=byCat[cat.key];
+    if(!d||!d.total) return '';
+    return `<div class="sum-card">
+      <div class="sum-cat-label">
+        <span class="cat-chip chip-${cat.cls}">${cat.emoji} ${cat.label}</span>
+        <span class="sum-total">${d.total}<span>total</span></span>
+      </div>
+      ${Object.entries(d.items).map(([item,q])=>`<div class="sum-item"><span>${esc(item)}</span><span>×${q}</span></div>`).join('')}
+    </div>`;
+  }).filter(Boolean).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   EMAIL ORDERS
+══════════════════════════════════════════════════════ */
+function emailOrders() {
+  const orders = cachedOrders;
+  if (!orders.length) { toast('⚠️ No orders to send'); return; }
+  const ds = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+  const byCat={};
+  CATS.forEach(c=>{byCat[c.key]={}});
+  orders.forEach(o=>{
+    const k=o.catkey||o.catKey||'lunch', item=o.item||'', q=Number(o.qty)||1;
+    if(byCat[k]) byCat[k][item]=(byCat[k][item]||0)+q;
+  });
+
+  let body=`iSpice Team Orders — ${ds}\n${'='.repeat(46)}\n\nSUMMARY\n${'-'.repeat(24)}\n`;
+  CATS.forEach(cat=>{
+    const items=byCat[cat.key];
+    if(!Object.keys(items).length) return;
+    body+=`\n${cat.emoji} ${cat.label.toUpperCase()}\n`;
+    Object.entries(items).forEach(([item,q])=>{body+=`  ${item}: ×${q}\n`;});
+  });
+  body+=`\n${'='.repeat(46)}\nINDIVIDUAL ORDERS\n${'-'.repeat(24)}\n`;
+  orders.forEach(o=>{
+    body+=`${o.name||''} | ${o.catlabel||o.catLabel||''} | ${o.item||''} ×${o.qty||1} (${o.time||''})`;
+    if(o.comment) body+=`\n  → Note: ${o.comment}`;
+    body+='\n';
+  });
+
+  window.location.href=`mailto:${REP_EMAIL}?subject=${encodeURIComponent('iSpice Orders — '+ds)}&body=${encodeURIComponent(body)}`;
+}
+
+/* ══════════════════════════════════════════════════════
+   CLEAR ORDERS
+══════════════════════════════════════════════════════ */
+async function clearOrders() {
+  if (!confirm('Clear ALL orders? Cannot be undone.')) return;
+
+  saveLocal([]);
+
+  if (SCRIPT_URL) {
+    try {
+      await fetch(SCRIPT_URL+'?action=clear', {redirect:'follow'});
+    } catch(e) { /* silent */ }
+  }
+
+  cachedOrders = []; lastCount = 0;
+  renderOrders([]);
+  renderSummary([]);
+  updateCount(0);
+  toast('🗑 Orders cleared');
+}
+
+/* ══════════════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════════════ */
+function switchTab(id,btn) {
+  document.querySelectorAll('.tab-view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if (id==='orders')  { renderOrders(cachedOrders); renderSummary(cachedOrders); }
+  if (id==='summary') { renderSummary(cachedOrders); }
+  if (id==='menu')    { buildEditorTabs(); renderEditorItems(); }
+}
+
+/* ══════════════════════════════════════════════════════
+   MENU EDITOR
+══════════════════════════════════════════════════════ */
+function buildEditorTabs() {
+  document.getElementById('editorCatTabs').innerHTML = CATS.map(c=>`
+    <button class="ecat-tab ${c.key===editorCat?'active':''}" onclick="setEditorCat('${c.key}')">
+      ${c.emoji} ${c.label}
+    </button>`).join('');
+}
+function setEditorCat(key) { editorCat=key; buildEditorTabs(); renderEditorItems(); document.getElementById('newItem').value=''; document.getElementById('newItem').focus(); }
+function renderEditorItems() {
+  const menu=getMenu(), items=menu[editorCat]||[];
+  const list=document.getElementById('itemList');
+  if(!items.length){list.innerHTML='<div class="no-items">No items yet — type a name above and press +</div>';return;}
+  list.innerHTML=items.map((item,i)=>`
+    <div class="item-row">
+      <span class="item-name">${esc(item)}</span>
+      <button class="del-btn" onclick="deleteItem(${i})">✕</button>
+    </div>`).join('');
+}
+function addMenuItem() {
+  const inp=document.getElementById('newItem'), name=inp.value.trim();
+  if(!name){inp.focus();return;}
+  const menu=getMenu();
+  if(!menu[editorCat]) menu[editorCat]=[];
+  if(menu[editorCat].some(x=>x.toLowerCase()===name.toLowerCase())){toast('⚠️ Item already exists');return;}
+  menu[editorCat].push(name); saveMenu(menu); renderEditorItems();
+  inp.value=''; inp.focus(); toast('✅ Added: '+name);
+}
+function deleteItem(i) {
+  const menu=getMenu(), item=menu[editorCat][i];
+  if(!confirm(`Remove "${item}"?`)) return;
+  menu[editorCat].splice(i,1); saveMenu(menu); renderEditorItems(); toast('Removed');
+}
+
+/* ══════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════ */
+function updateCount(n) { document.getElementById('totalCount').textContent = n||0; }
+function setSyncStatus(msg) { document.getElementById('syncStatus').textContent = msg; }
+function showLiveBar(msg) {
+  const bar=document.getElementById('liveBar');
+  bar.textContent=msg; bar.style.display='flex';
+  clearTimeout(bar._t); bar._t=setTimeout(()=>{bar.style.display='none';},6000);
+}
+function toast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+init();
+</script>
+</body>
+</html>

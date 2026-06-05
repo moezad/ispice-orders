@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>iSpice | Place Your Order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --green:#78bd2a;--green2:#4f8619;--dark:#152012;--muted:#65715f;
+  --line:#dae7d4;--soft:#f5fbef;--cream:#fffdf7;--red:#d73226;
+  --shadow:0 22px 60px rgba(19,35,12,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif;
+  color:var(--dark);-webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(circle at 0% 0%,rgba(120,189,42,.16),transparent 28rem),
+    radial-gradient(circle at 100% 5%,rgba(255,200,87,.16),transparent 24rem),
+    linear-gradient(180deg,#fff,var(--cream) 30%,#fff);
+  min-height:100%;
+}
+.app{min-height:100%;display:flex;flex-direction:column}
+
+/* SETUP BANNER */
+.setup-banner{
+  background:#fff8e0;border-bottom:1px solid #f5e0a8;
+  padding:11px 20px;text-align:center;
+  font-size:13px;font-weight:600;color:#92400e;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.setup-banner a{color:var(--green2);font-weight:800;text-decoration:none}
+.setup-banner a:hover{text-decoration:underline}
+
+/* TOPBAR */
+.topbar{
+  position:sticky;top:0;z-index:60;height:70px;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(218,231,212,.95);
+  display:flex;align-items:center;justify-content:space-between;padding:0 20px;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{
+  width:40px;height:40px;border-radius:13px;
+  background:linear-gradient(180deg,#8aca3e,#63a61d);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  box-shadow:0 4px 14px rgba(120,189,42,.35);
+}
+.brand h1{font-family:Sora,sans-serif;font-size:19px;font-weight:800;letter-spacing:-.5px}
+.brand h1 em{font-style:normal;color:var(--green2)}
+.brand p{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-top:1px}
+.week-pill{background:#fff;border:1px solid var(--line);padding:7px 13px;border-radius:999px;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
+
+/* MAIN */
+.main-content{flex:1;padding:28px 20px 110px;max-width:580px;margin:0 auto;width:100%}
+.step{display:none}.step.active{display:block}
+.pg-title{font-family:Sora,sans-serif;font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:5px}
+.pg-sub{font-size:14px;color:var(--muted);margin-bottom:22px;font-weight:500}
+
+/* CATEGORY GRID */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cat-card{border-radius:22px;border:1.5px solid var(--line);background:#fff;padding:20px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.cat-card::before{content:'';position:absolute;right:-18px;top:-18px;width:72px;height:72px;border-radius:50%;opacity:.45;transition:opacity .2s}
+.cat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}.cat-card:hover::before{opacity:.9}
+.cat-breakfast{background:linear-gradient(155deg,#fffbef 0%,#fff 70%);border-color:#f5e0a8}
+.cat-breakfast::before{background:radial-gradient(circle,rgba(245,158,11,.28),transparent 70%)}
+.cat-breakfast.sel{border-color:#d97706;background:#fffbef;box-shadow:0 8px 28px rgba(217,119,6,.15)}
+.cat-salad{background:linear-gradient(155deg,#f6fde8 0%,#fff 70%);border-color:#c8e8a0}
+.cat-salad::before{background:radial-gradient(circle,rgba(120,189,42,.28),transparent 70%)}
+.cat-salad.sel{border-color:var(--green);background:#f5fde8;box-shadow:0 8px 28px rgba(120,189,42,.15)}
+.cat-saladlunch{background:linear-gradient(155deg,#f0f9ff 0%,#fff 70%);border-color:#a8d8f0}
+.cat-saladlunch::before{background:radial-gradient(circle,rgba(14,165,233,.24),transparent 70%)}
+.cat-saladlunch.sel{border-color:#0ea5e9;background:#f0f9ff;box-shadow:0 8px 28px rgba(14,165,233,.14)}
+.cat-lunch{background:linear-gradient(155deg,#fff7ed 0%,#fff 70%);border-color:#fed7a0}
+.cat-lunch::before{background:radial-gradient(circle,rgba(249,115,22,.24),transparent 70%)}
+.cat-lunch.sel{border-color:#f97316;background:#fff7ed;box-shadow:0 8px 28px rgba(249,115,22,.14)}
+.cat-extras{background:linear-gradient(155deg,#faf5ff 0%,#fff 70%);border-color:#d8b8f8}
+.cat-extras::before{background:radial-gradient(circle,rgba(147,51,234,.22),transparent 70%)}
+.cat-extras.sel{border-color:#9333ea;background:#faf5ff;box-shadow:0 8px 28px rgba(147,51,234,.12)}
+.cat-emoji{font-size:32px;margin-bottom:10px;display:block;line-height:1}
+.cat-name{font-size:15px;font-weight:800;letter-spacing:-.2px}
+.cat-count{font-size:12px;color:var(--muted);margin-top:3px;font-weight:500}
+
+/* FORM */
+.form-card{background:rgba(255,255,255,.94);border:1px solid rgba(218,231,212,.95);border-radius:26px;padding:24px 20px;box-shadow:var(--shadow);margin-bottom:16px}
+.form-hd{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.back-btn{width:38px;height:38px;border-radius:13px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:18px;color:var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.back-btn:hover{border-color:var(--green);color:var(--dark);background:var(--soft)}
+.form-hd-text h3{font-size:18px;font-weight:800;letter-spacing:-.3px}
+.form-hd-text p{font-size:12px;color:var(--muted);margin-top:2px}
+.fgroup{margin-bottom:16px}.fgroup:last-child{margin-bottom:0}
+.flabel{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:7px}
+.flabel span{text-transform:none;letter-spacing:0;font-weight:500;color:#a0ada0}
+input[type=text],select,textarea{width:100%;padding:13px 15px;background:#fff;border:1.5px solid var(--line);border-radius:14px;font-family:Inter,sans-serif;font-size:15px;font-weight:500;color:var(--dark);outline:none;transition:all .2s;appearance:none;-webkit-appearance:none}
+input::placeholder,textarea::placeholder{color:#b8c8b4}
+input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(120,189,42,.14)}
+.sel-wrap{position:relative}.sel-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:13px}
+textarea{resize:vertical;min-height:86px;line-height:1.55}
+.qty-row{display:flex;align-items:center;gap:12px}
+.q-btn{width:46px;height:46px;flex-shrink:0;border-radius:13px;border:1.5px solid var(--line);background:#fff;color:var(--dark);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.q-btn:hover{border-color:var(--green);color:var(--green2);background:var(--soft)}
+.q-val{flex:1;text-align:center;font-size:26px;font-weight:900;color:var(--dark)}
+.btn-submit{
+  width:100%;padding:16px;margin-top:8px;
+  background:linear-gradient(180deg,#8aca3e,#63a61d);
+  color:#fff;border:none;border-radius:16px;
+  font-family:Inter,sans-serif;font-size:16px;font-weight:800;
+  cursor:pointer;transition:all .2s;box-shadow:0 6px 22px rgba(120,189,42,.4);
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(120,189,42,.5)}
+.btn-submit:disabled{opacity:.65;cursor:not-allowed;transform:none}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* REP LINK */
+.rep-footer{text-align:center;margin-top:18px;padding:14px;border-radius:18px;border:1px dashed var(--line);background:rgba(255,255,255,.6)}
+.rep-footer p{font-size:12px;color:var(--muted);margin-bottom:6px}
+.rep-footer a{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--green2);text-decoration:none;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:#fff;transition:all .15s}
+.rep-footer a:hover{border-color:var(--green);background:var(--soft)}
+
+/* BOTTOM NAV */
+.page-nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:14px;min-height:80px;padding:14px 20px;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);z-index:50}
+.nav-center{font-size:13px;color:var(--muted);font-weight:700;text-align:center}
+.nav-center strong{color:var(--dark)}
+.btn-nav{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:11px 18px;font-family:Inter,sans-serif;font-size:13px;font-weight:800;color:var(--dark);cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-nav:hover{border-color:var(--green);background:var(--soft)}
+.btn-nav.primary{background:var(--dark);color:#fff;border-color:var(--dark)}
+.btn-nav.primary:hover{background:var(--green2);border-color:var(--green2)}
+.btn-nav:disabled{opacity:.35;pointer-events:none}
+
+/* TOAST */
+#toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--dark);color:#fff;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:700;box-shadow:var(--shadow);opacity:0;transition:all .32s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══ SETUP BANNER — hidden once SCRIPT_URL is set ══ -->
+<div class="setup-banner" id="setupBanner" style="display:none">
+  ⚙️ Orders saving locally only — <a href="dashboard.html">open Dashboard</a> to configure cross-device sync
+</div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-icon">🌶️</div>
+    <div><h1>i<em>Spice</em></h1><p>Team Orders</p></div>
+  </div>
+  <div class="week-pill" id="weekBadge">—</div>
+</header>
+
+<main class="main-content">
+
+  <div id="step1" class="step active">
+    <h2 class="pg-title">What are you having? 🍽️</h2>
+    <p class="pg-sub">Choose your meal category to get started</p>
+    <div class="cat-grid" id="catGrid"></div>
+    <div class="rep-footer">
+      <p>Are you the food rep?</p>
+      <a href="dashboard.html">Open Rep Dashboard →</a>
+    </div>
+  </div>
+
+  <div id="step2" class="step">
+    <div class="form-card">
+      <div class="form-hd">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div class="form-hd-text">
+          <h3 id="formCatTitle">—</h3>
+          <p>Fill in your details below</p>
+        </div>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Your Name</label>
+        <input type="text" id="empName" placeholder="First name…" autocomplete="off"/>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Menu Item</label>
+        <div class="sel-wrap"><select id="menuItem"><option value="">— Choose a dish —</option></select></div>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Quantity</label>
+        <div class="qty-row">
+          <button class="q-btn" onclick="changeQty(-1)">−</button>
+          <div class="q-val" id="qtyDisplay">1</div>
+          <button class="q-btn" onclick="changeQty(+1)">+</button>
+        </div>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Notes / Special Request <span>(optional)</span></label>
+        <textarea id="orderComment" placeholder="e.g. No onions, extra spicy, gluten-free…"></textarea>
+      </div>
+      <button class="btn-submit" id="submitBtn" onclick="submitOrder()">✓ &nbsp;Place My Order</button>
+    </div>
+  </div>
+
+</main>
+
+<nav class="page-nav">
+  <button class="btn-nav" id="navBack" onclick="goBack()" disabled>← Back</button>
+  <span class="nav-center" id="stepLabel"><strong>Step 1</strong> of 2 — Choose category</span>
+  <button class="btn-nav primary" id="navNext" onclick="nextStep()">Continue →</button>
+</nav>
+
+</div>
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   ⚙️  CONFIGURATION
+   Paste your Google Apps Script URL here.
+   (See dashboard.html for setup instructions.)
+══════════════════════════════════════════════════════ */
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCt24DVokBCGA_ZdZNcmPMm5SlX7OAmi0cKqB4MasnzD2ZbfPuJEwG79cw02tNADBu/exec';
+
+/* ══════════════════════════════════════════════════════
+   CATEGORIES
+══════════════════════════════════════════════════════ */
+const CATS = [
+  {key:'breakfast', label:'Breakfast',    emoji:'🌅', cls:'breakfast'  },
+  {key:'salad',     label:'Salad',         emoji:'🥗', cls:'salad'      },
+  {key:'saladlunch',label:'Salad & Lunch', emoji:'🍱', cls:'saladlunch' },
+  {key:'lunch',     label:'Lunch',         emoji:'🍛', cls:'lunch'      },
+  {key:'extras',    label:'Extras',        emoji:'✨', cls:'extras'     },
+];
+
+const DEFAULT_MENU = {
+  breakfast:  ['Egg & Cheese Wrap 🥚','Avocado Toast 🥑','Oatmeal Berry Bowl 🫐','Pancake Stack 🥞','Fruit Parfait 🍓','Breakfast Burrito 🌯'],
+  salad:      ['Caesar Salad 🥗','Greek Salad 🫒','Quinoa Power Bowl 🌾','Caprese Salad 🍅','Garden Salad 🥬','Asian Slaw 🥕'],
+  saladlunch: ['Grilled Chicken Salad 🍗','Salmon Caesar 🐟','Steak Salad Bowl 🥩','Falafel Bowl 🧆','Tuna Nicoise 🐠'],
+  lunch:      ['Chicken Biryani 🍗','Butter Chicken 🍛','Lamb Curry 🍖','Paneer Tikka Masala 🧀','Dal Makhani 🫘','Shrimp Coconut Curry 🦐','Vegetable Korma 🥦'],
+  extras:     ['Naan Bread 🫓','Basmati Rice 🍚','Mango Lassi 🥭','Sparkling Water 💧','Dessert of the Day 🍮'],
+};
+
+let selectedCat = null, qty = 1, step = 1;
+
+const getMenu    = () => { const s=localStorage.getItem('ispice_menu_v3'); return s?JSON.parse(s):DEFAULT_MENU; };
+const getOrders  = () => JSON.parse(localStorage.getItem('ispice_orders_v3')||'[]');
+const saveOrders = o  => localStorage.setItem('ispice_orders_v3', JSON.stringify(o));
+
+/* ── Init ─────────────────────────────────────────── */
+function init() {
+  const d=new Date(), mon=new Date(d);
+  mon.setDate(d.getDate()-((d.getDay()+6)%7));
+  document.getElementById('weekBadge').textContent = 'Week of '+mon.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  if (!SCRIPT_URL) document.getElementById('setupBanner').style.display='flex';
+  buildGrid();
+}
+
+function buildGrid() {
+  const menu = getMenu();
+  document.getElementById('catGrid').innerHTML = CATS.map(c=>`
+    <div class="cat-card cat-${c.cls}" onclick="pickCat('${c.key}')">
+      <span class="cat-emoji">${c.emoji}</span>
+      <div class="cat-name">${c.label}</div>
+      <div class="cat-count">${(menu[c.key]||[]).length} items this week</div>
+    </div>`).join('');
+}
+
+/* ── Navigation ───────────────────────────────────── */
+function setStep(n) {
+  step=n;
+  document.querySelectorAll('.step').forEach(el=>el.classList.remove('active'));
+  document.getElementById('step'+n).classList.add('active');
+  const labels=['Choose category','Fill your order'];
+  document.getElementById('stepLabel').innerHTML=`<strong>Step ${n}</strong> of 2 — ${labels[n-1]}`;
+  document.getElementById('navBack').disabled=(n===1);
+  document.getElementById('navNext').style.display=(n>=2?'none':'');
+  window.scrollTo(0,0);
+}
+function goBack()  { if(step>1) setStep(step-1); }
+function nextStep(){ if(step===1){ if(!selectedCat){toast('⚠️ Please choose a meal category');return;} setStep(2); } }
+
+/* ── Category pick ────────────────────────────────── */
+function pickCat(key) {
+  selectedCat=key;
+  const cat=CATS.find(c=>c.key===key);
+  const items=(getMenu()[key]||[]);
+  document.querySelectorAll('.cat-card').forEach(el=>el.classList.remove('sel'));
+  document.querySelector('.cat-'+key)?.classList.add('sel');
+  document.getElementById('formCatTitle').textContent=cat.emoji+' '+cat.label;
+  const sel=document.getElementById('menuItem');
+  sel.innerHTML='<option value="">— Choose a dish —</option>';
+  items.forEach(item=>{ const o=document.createElement('option'); o.value=item; o.textContent=item; sel.appendChild(o); });
+  document.getElementById('empName').value=localStorage.getItem('ispice_last_name')||'';
+  qty=1; document.getElementById('qtyDisplay').textContent='1';
+  document.getElementById('orderComment').value='';
+  setStep(2);
+}
+
+function changeQty(d){ qty=Math.max(1,Math.min(20,qty+d)); document.getElementById('qtyDisplay').textContent=qty; }
+
+/* ── Submit ───────────────────────────────────────── */
+async function submitOrder() {
+  const name    = document.getElementById('empName').value.trim();
+  const item    = document.getElementById('menuItem').value;
+  const comment = document.getElementById('orderComment').value.trim();
+
+  if (!name) { err('empName','Please enter your name'); return; }
+  if (!item) { err('menuItem','Please choose a dish');  return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Sending…';
+
+  localStorage.setItem('ispice_last_name', name);
+  const cat = CATS.find(c=>c.key===selectedCat);
+  const order = {
+    id: Date.now(), name, item, qty, comment,
+    catKey:   selectedCat,
+    catLabel: cat.label,
+    catEmoji: cat.emoji,
+    catCls:   cat.cls,
+    time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
+  };
+
+  // 1 — Always save locally
+  const orders = getOrders();
+  orders.push(order);
+  saveOrders(orders);
+
+  // 2 — Send to Google Sheets (main sync)
+  if (SCRIPT_URL) {
+    try {
+      const url = SCRIPT_URL + '?action=add&order=' + encodeURIComponent(JSON.stringify(order));
+      const res = await fetch(url, {redirect:'follow'});
+      const data = await res.json();
+      if (!data.ok) throw new Error('Script returned error');
+    } catch(e) {
+      // Silently keep local copy — rep can still email orders
+      console.warn('Sheets sync failed:', e);
+    }
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '✓ &nbsp;Place My Order';
+  toast('🎉 Order placed! Enjoy your '+cat.label.toLowerCase()+'.');
+  selectedCat = null;
+  setStep(1);
+  buildGrid();
+}
+
+/* ── Helpers ──────────────────────────────────────── */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function err(id,msg){
+  const el=document.getElementById(id);
+  el.style.borderColor='var(--red)'; el.style.boxShadow='0 0 0 3px rgba(215,50,38,.14)';
+  toast('⚠️ '+msg);
+  setTimeout(()=>{el.style.borderColor='';el.style.boxShadow='';},1800);
+}
+
+init();
+</script>
+</body>
+</html>
